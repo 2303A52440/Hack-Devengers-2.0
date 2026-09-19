@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniFlow AI — Autonomous WhatsApp CRM & UPI Billing Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 500: '#10B981', 600: '#059669', 700: '#047857' },
+                        whatsapp: { 500: '#25D366', 600: '#128C7E', 700: '#075E54' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .chat-bg { background-color: #0b141a; background-image: radial-gradient(#111b21 1px, transparent 0); background-size: 20px 20px; }
+        .bubble-in { background-color: #202c33; border-radius: 0px 12px 12px 12px; }
+        .bubble-out { background-color: #005c4b; border-radius: 12px 0px 12px 12px; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <i class="fa-brands fa-whatsapp text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">OmniFlow AI</h1>
+                    <p class="text-xs text-slate-400">Autonomous WhatsApp CRM & Instant UPI Billing Suite</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mr-2"></span> Engine Active
+                </span>
+                <a href="/docs" target="_blank" class="px-3 py-1.5 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">Swagger API Specs</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Metrics Ribbon -->
+    <section class="border-b border-slate-800/80 bg-slate-900/40 py-4">
+        <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-400 uppercase tracking-wider">Total Revenue</p>
+                    <p id="metric-revenue" class="text-2xl font-bold text-emerald-400">₹0.00</p>
+                </div>
+                <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-400"><i class="fa-solid fa-indian-rupee-sign text-xl"></i></div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-400 uppercase tracking-wider">Active Leads</p>
+                    <p id="metric-leads" class="text-2xl font-bold text-sky-400">0</p>
+                </div>
+                <div class="p-3 bg-sky-500/10 rounded-lg text-sky-400"><i class="fa-solid fa-users text-xl"></i></div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-400 uppercase tracking-wider">Invoices Issued</p>
+                    <p id="metric-invoices" class="text-2xl font-bold text-amber-400">0</p>
+                </div>
+                <div class="p-3 bg-amber-500/10 rounded-lg text-amber-400"><i class="fa-solid fa-file-invoice-dollar text-xl"></i></div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-400 uppercase tracking-wider">AI Sentiment Score</p>
+                    <p id="metric-sentiment" class="text-2xl font-bold text-indigo-400">+94%</p>
+                </div>
+                <div class="p-3 bg-indigo-500/10 rounded-lg text-indigo-400"><i class="fa-solid fa-face-smile text-xl"></i></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Workspace -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
+
+        <!-- Left Column: Interactive Chat Sandbox (5 Cols) -->
+        <div class="lg:col-span-5 flex flex-col rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden h-[680px]">
+            <!-- Sandbox Header -->
+            <div class="p-4 bg-slate-800/90 border-b border-slate-700 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-whatsapp-600 flex items-center justify-center text-white font-bold text-sm">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-white">Live WhatsApp Simulator</p>
+                        <p class="text-xs text-emerald-400">Customer: <span id="current-phone">+919876543210</span></p>
+                    </div>
+                </div>
+                <select id="phone-select" onchange="switchPhone()" class="bg-slate-900 text-xs text-slate-300 border border-slate-700 rounded-lg px-2 py-1 focus:outline-none">
+                    <option value="+919876543210">Customer #1 (+919876543210)</option>
+                    <option value="+919123456789">Customer #2 (+919123456789)</option>
+                    <option value="+919988776655">Customer #3 (+919988776655)</option>
+                </select>
+            </div>
+
+            <!-- Chat Window -->
+            <div id="chat-container" class="flex-1 p-4 overflow-y-auto space-y-3 chat-bg">
+                <div class="text-center my-2">
+                    <span class="bg-slate-800/80 text-slate-400 text-[11px] px-3 py-1 rounded-full border border-slate-700">🔒 Messages end-to-end encrypted by OmniFlow AI</span>
+                </div>
+            </div>
+
+            <!-- Chat Controls -->
+            <div class="p-3 bg-slate-900 border-t border-slate-800 flex flex-col space-y-2">
+                <!-- Preset Sample Buttons -->
+                <div class="flex items-center space-x-2 overflow-x-auto pb-1 text-xs">
+                    <span class="text-slate-500 whitespace-nowrap">Quick Prompts:</span>
+                    <button onclick="sendQuickPrompt('Hi, what courses do you offer?')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap">💡 Courses</button>
+                    <button onclick="sendQuickPrompt('I want to enroll in AI Python Masterclass')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap">🛒 Enroll</button>
+                    <button onclick="sendQuickPrompt('I paid 4999 via UPI, please confirm')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap">💸 Payment Done</button>
+                </div>
+
+                <!-- Input Row -->
+                <div class="flex items-center space-x-2">
+                    <button id="voice-toggle" onclick="toggleVoiceMode()" class="p-2.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white transition" title="Toggle Voice Note Simulation">
+                        <i class="fa-solid fa-microphone text-lg"></i>
+                    </button>
+                    <input type="text" id="chat-input" placeholder="Type customer message or voice transcript..." class="flex-1 bg-slate-950 text-sm text-white px-4 py-2.5 rounded-xl border border-slate-700 focus:outline-none focus:border-emerald-500" onkeypress="if(event.key==='Enter') sendMessage()">
+                    <button onclick="sendMessage()" class="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition shadow-lg shadow-emerald-600/20">
+                        <i class="fa-solid fa-paper-plane text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: CRM Leads & Invoices Dashboard (7 Cols) -->
+        <div class="lg:col-span-7 flex flex-col space-y-6">
+
+            <!-- Tabs Header -->
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div class="flex space-x-4">
+                    <button onclick="switchTab('leads')" id="tab-btn-leads" class="pb-2 text-sm font-semibold border-b-2 border-emerald-500 text-emerald-400">📊 Customer Leads CRM</button>
+                    <button onclick="switchTab('invoices')" id="tab-btn-invoices" class="pb-2 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200">🧾 GST Invoices & UPI Links</button>
+                </div>
+                <button onclick="refreshData()" class="text-xs text-slate-400 hover:text-white flex items-center space-x-1">
+                    <i class="fa-solid fa-rotate-right"></i> <span>Refresh</span>
+                </button>
+            </div>
+
+            <!-- Tab 1: Leads Table -->
+            <div id="tab-content-leads" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 overflow-hidden flex-1">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="text-xs text-slate-400 uppercase bg-slate-950/50 border-b border-slate-800">
+                            <tr>
+                                <th class="p-3">Customer Phone</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3">Total Spend</th>
+                                <th class="p-3">Last Active</th>
+                                <th class="p-3 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leads-tbody" class="divide-y divide-slate-800/60">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 2: Invoices Table -->
+            <div id="tab-content-invoices" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 overflow-hidden flex-1 hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="text-xs text-slate-400 uppercase bg-slate-950/50 border-b border-slate-800">
+                            <tr>
+                                <th class="p-3">Invoice ID</th>
+                                <th class="p-3">Customer</th>
+                                <th class="p-3">Amount</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3 text-right">UPI QR Code</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoices-tbody" class="divide-y divide-slate-800/60">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Modal for UPI QR View -->
+    <div id="qr-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-sm w-full text-center relative shadow-2xl">
+            <button onclick="closeModal()" class="absolute top-3 right-3 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h3 class="text-lg font-bold text-white mb-1">Instant UPI Payment QR</h3>
+            <p id="modal-inv-id" class="text-xs text-emerald-400 mb-4">Invoice #INV12345</p>
+            <div class="bg-white p-4 rounded-xl inline-block shadow-inner mb-4">
+                <img id="modal-qr-img" src="" alt="UPI QR Code" class="w-48 h-48 object-contain">
+            </div>
+            <p class="text-xs text-slate-400">Scan using any UPI App (GPay, PhonePe, Paytm, BHIM)</p>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Engine -->
+    <script>
+        let isVoiceMode = false;
+
+        function toggleVoiceMode() {
+            isVoiceMode = !isVoiceMode;
+            const btn = document.getElementById('voice-toggle');
+            if (isVoiceMode) {
+                btn.classList.remove('bg-slate-800', 'text-slate-400');
+                btn.classList.add('bg-red-600', 'text-white', 'animate-pulse');
+                btn.title = "Voice Mode Active: Input treated as audio transcript";
+            } else {
+                btn.classList.remove('bg-red-600', 'text-white', 'animate-pulse');
+                btn.classList.add('bg-slate-800', 'text-slate-400');
+                btn.title = "Toggle Voice Note Simulation";
+            }
+        }
+
+        function switchPhone() {
+            const phone = document.getElementById('phone-select').value;
+            document.getElementById('current-phone').innerText = phone;
+            document.getElementById('chat-container').innerHTML = '';
+        }
+
+        function sendQuickPrompt(text) {
+            document.getElementById('chat-input').value = text;
+            sendMessage();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const phone = document.getElementById('phone-select').value;
+            const container = document.getElementById('chat-container');
+
+            // Render User Bubble
+            const userMsgHtml = `
+                <div class="flex flex-col items-end mb-3">
+                    <div class="bubble-out text-white text-sm px-3 py-2 max-w-[85%] shadow-md">
+                        ${isVoiceMode ? '<span class="text-xs text-amber-300 block mb-0.5"><i class="fa-solid fa-microphone mr-1"></i> Voice Note</span>' : ''}
+                        ${text}
+                        <div class="text-[10px] text-emerald-200 text-right mt-1">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', userMsgHtml);
+            input.value = '';
+            container.scrollTop = container.scrollHeight;
+
+            // Fetch AI Response
+            try {
+                const response = await fetch('/api/simulate_chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: phone, message: text, is_voice: isVoiceMode })
+                });
+                const data = await response.json();
+
+                let attachmentHtml = '';
+                if (data.attachment) {
+                    const filename = data.attachment.split(/[\\/]/).pop();
+                    attachmentHtml = `
+                        <div class="mt-2 bg-slate-900/90 p-3 rounded-lg border border-slate-700 text-center">
+                            <p class="text-xs text-emerald-400 font-semibold mb-2">📸 Dynamic UPI QR Code Attached</p>
+                            <img src="/output/${filename}" class="w-36 h-36 mx-auto rounded-lg bg-white p-2 shadow-md">
+                            <button onclick="openModal('/output/${filename}', 'Invoice')" class="mt-2 text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded-lg">Full Screen QR</button>
+                        </div>
+                    `;
+                }
+
+                const aiMsgHtml = `
+                    <div class="flex flex-col items-start mb-3">
+                        <div class="bubble-in text-slate-100 text-sm px-3 py-2 max-w-[85%] shadow-md border border-slate-700/50">
+                            <span class="text-[10px] text-emerald-400 font-bold block mb-1">🤖 OmniFlow AI Agent</span>
+                            <div class="whitespace-pre-line">${data.response_text}</div>
+                            ${attachmentHtml}
+                            <div class="text-[10px] text-slate-400 text-right mt-1">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', aiMsgHtml);
+                container.scrollTop = container.scrollHeight;
+
+                refreshData();
+            } catch (err) {
+                console.error("Error communicating with AI engine:", err);
+            }
+        }
+
+        async function refreshData() {
+            try {
+                // Fetch Leads
+                const leadsRes = await fetch('/api/leads');
+                const leads = await leadsRes.json();
+                
+                const leadsTbody = document.getElementById('leads-tbody');
+                leadsTbody.innerHTML = '';
+                let totalRev = 0;
+
+                leads.forEach(l => {
+                    totalRev += l.total_spend || 0;
+                    let badgeClass = "bg-sky-500/10 text-sky-400 border-sky-500/20";
+                    if (l.status === 'CONVERTED') badgeClass = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+                    if (l.status === 'INVOICED') badgeClass = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+
+                    leadsTbody.innerHTML += `
+                        <tr class="hover:bg-slate-800/40 transition">
+                            <td class="p-3 font-medium text-white">${l.phone}</td>
+                            <td class="p-3"><span class="px-2.5 py-0.5 rounded-full text-xs border ${badgeClass}">${l.status}</span></td>
+                            <td class="p-3 font-semibold text-emerald-400">₹${(l.total_spend || 0).toFixed(2)}</td>
+                            <td class="p-3 text-xs text-slate-400">${new Date(l.last_interaction).toLocaleTimeString()}</td>
+                            <td class="p-3 text-right">
+                                <button onclick="selectLead('${l.phone}')" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded">Simulate</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById('metric-revenue').innerText = `₹${totalRev.toFixed(2)}`;
+                document.getElementById('metric-leads').innerText = leads.length;
+
+                // Fetch Invoices
+                const invRes = await fetch('/api/invoices');
+                const invoices = await invRes.json();
+
+                const invoicesTbody = document.getElementById('invoices-tbody');
+                invoicesTbody.innerHTML = '';
+                document.getElementById('metric-invoices').innerText = invoices.length;
+
+                invoices.forEach(inv => {
+                    const filename = inv.upi_qr_path ? inv.upi_qr_path.split(/[\\/]/).pop() : '';
+                    invoicesTbody.innerHTML += `
+                        <tr class="hover:bg-slate-800/40 transition">
+                            <td class="p-3 font-mono text-xs text-amber-300">${inv.id}</td>
+                            <td class="p-3 text-white">${inv.customer_phone}</td>
+                            <td class="p-3 font-bold text-emerald-400">₹${inv.total_amount.toFixed(2)}</td>
+                            <td class="p-3"><span class="px-2 py-0.5 text-xs rounded ${inv.status==='PAID'?'bg-emerald-500/20 text-emerald-400':'bg-amber-500/20 text-amber-400'}">${inv.status}</span></td>
+                            <td class="p-3 text-right">
+                                ${filename ? `<button onclick="openModal('/output/${filename}', '${inv.id}')" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1 rounded">View QR</button>` : '-'}
+                            </td>
+                        </tr>
+                    `;
+                });
+
+            } catch (err) {
+                console.error("Error refreshing dashboard data:", err);
+            }
+        }
+
+        function selectLead(phone) {
+            document.getElementById('phone-select').value = phone;
+            switchPhone();
+        }
+
+        function switchTab(tab) {
+            if (tab === 'leads') {
+                document.getElementById('tab-content-leads').classList.remove('hidden');
+                document.getElementById('tab-content-invoices').classList.add('hidden');
+                document.getElementById('tab-btn-leads').className = "pb-2 text-sm font-semibold border-b-2 border-emerald-500 text-emerald-400";
+                document.getElementById('tab-btn-invoices').className = "pb-2 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200";
+            } else {
+                document.getElementById('tab-content-leads').classList.add('hidden');
+                document.getElementById('tab-content-invoices').classList.remove('hidden');
+                document.getElementById('tab-btn-invoices').className = "pb-2 text-sm font-semibold border-b-2 border-emerald-500 text-emerald-400";
+                document.getElementById('tab-btn-leads').className = "pb-2 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200";
+            }
+        }
+
+        function openModal(qrSrc, invId) {
+            document.getElementById('modal-qr-img').src = qrSrc;
+            document.getElementById('modal-inv-id').innerText = `Invoice #${invId}`;
+            document.getElementById('qr-modal').classList.remove('hidden');
+            document.getElementById('qr-modal').classList.add('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('qr-modal').classList.add('hidden');
+            document.getElementById('qr-modal').classList.remove('flex');
+        }
+
+        // Initialize dashboard on load
+        window.onload = () => {
+            refreshData();
+            sendQuickPrompt('Hi');
+        };
+    </script>
+</body>
+</html>
