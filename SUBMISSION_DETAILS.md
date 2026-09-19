@@ -56,5 +56,6 @@ Indian small businesses, coaching institutes, and e-commerce vendors face three 
 ### 8. Repository & Demo Links
 - **GitHub Repository Link:** `https://github.com/2303A52440/Hack-Devengers-2.0.git`
 - **Demo Video Link:** *(Paste your Google Drive / YouTube video link here)*
-- **Live Demo / Web Dashboard URL:** `http://127.0.0.1:8000/dashboard`
+- **Live Deployment Link:** `https://shaky-clubs-pump.loca.lt/dashboard`
+
 
